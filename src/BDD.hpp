@@ -131,23 +131,25 @@ public:
 
         /* Reduction rule: Identical children */
         if (T == E) {
+            // what to do with references
             return T;
         }
 
-        bool output_neg = false; /* TODO */
-
         /* Look up in the unique table. */
-        const auto it = unique_table[var].find({T, E});
-        if (it != unique_table[var].end()) {
-            /* The required node already exists. Return it. */
-            return make_signal(it->second, output_neg);
+        const auto original_position = unique_table[var].find({T, E});
+        const auto complemented_position = unique_table[var].find({E, T});
+        if (original_position != unique_table[var].end()) {
+            /* The required node already exists. Return original_position. */
+            return make_signal(original_position->second);
+        } else if (complemented_position != unique_table[var].end()) {
+            return make_signal(complemented_position->second, true);
         } else {
-            /* Create a new node and insert it to the unique table. */
+            /* Create a new node and insert original_position to the unique table. */
             index_t const new_index = nodes.size();
             nodes.emplace_back(Node({var, T, E}));
             refs.emplace_back(0);
             unique_table[var][{T, E}] = new_index;
-            return make_signal(new_index, output_neg);
+            return make_signal(new_index);
         }
     }
 
@@ -160,12 +162,16 @@ public:
     /*********************** Ref & Deref **********************/
     /**********************************************************/
     signal_t ref(signal_t f) {
-        /* TODO */
+        auto index = get_index(f);
+        assert(index < refs.size());
+        refs[index] += 1;
         return f;
     }
 
     void deref(signal_t f) {
-        /* TODO */
+        auto index = get_index(f);
+        assert(index < refs.size() && refs[index] > 0);
+        refs[index] -= 1;
     }
 
     /**********************************************************/
