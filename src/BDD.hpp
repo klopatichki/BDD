@@ -101,19 +101,20 @@ private:
         return signal & COMPLEMENT_MASK;
     }
 
+    template<class Key>
     inline static signal_t cached_computation(
-            std::unordered_map<std::tuple<signal_t, signal_t>, signal_t> &cache,
-            signal_t f,
-            signal_t g,
-            const std::function<signal_t(signal_t, signal_t)>& func) {
-        auto original_order = std::tuple<signal_t, signal_t>(f, g);
-        auto commuted_order = std::tuple<signal_t, signal_t>(g, f);
-        if (cache.find(original_order) != cache.end()) {
-            return cache.find(original_order)->second;
-        } else if (cache.find(commuted_order) != cache.end()) {
-            return cache.find(commuted_order)->second;
+            std::unordered_map<Key, signal_t> &cache,
+            const Key &original,
+            const Key &commuted,
+            const std::function<signal_t()> &func) {
+        if (cache.find(original) != cache.end()) {
+            return cache.find(original)->second;
+        } else if (cache.find(commuted) != cache.end()) {
+            return cache.find(commuted)->second;
         }
-        return func(f, g);
+        auto result = func();
+        cache[original] = result;
+        return result;
     }
 
     signal_t AND_INTERNAL(signal_t f, signal_t g) {
@@ -260,6 +261,69 @@ private:
         return unique(x, r1, r0);
     }
 
+    signal_t ITE_INTERNAL(signal_t f, signal_t g, signal_t h) {
+        Node const &F = get_node(f);
+        Node const &G = get_node(g);
+        Node const &H = get_node(h);
+
+        /* trivial cases */
+        if (f == constant(true)) {
+            return g;
+        }
+        if (f == constant(false)) {
+            return h;
+        }
+        if (g == h) {
+            return g;
+        }
+
+        var_t x;
+        signal_t f0, f1, g0, g1, h0, h1;
+        if (F.v <= G.v && F.v <= H.v) /* F is not lower than both G and H */
+        {
+            x = F.v;
+            f0 = F.E;
+            f1 = F.T;
+            if (G.v == F.v) {
+                g0 = G.E;
+                g1 = G.T;
+            } else {
+                g0 = g1 = g;
+            }
+            if (H.v == F.v) {
+                h0 = H.E;
+                h1 = H.T;
+            } else {
+                h0 = h1 = h;
+            }
+        } else /* F.v > min(G.v, H.v) */
+        {
+            f0 = f1 = f;
+            if (G.v < H.v) {
+                x = G.v;
+                g0 = G.E;
+                g1 = G.T;
+                h0 = h1 = h;
+            } else if (H.v < G.v) {
+                x = H.v;
+                g0 = g1 = g;
+                h0 = H.E;
+                h1 = H.T;
+            } else /* G.v == H.v */
+            {
+                x = G.v;
+                g0 = G.E;
+                g1 = G.T;
+                h0 = H.E;
+                h1 = H.T;
+            }
+        }
+
+        signal_t const r0 = ITE(f0, g0, h0);
+        signal_t const r1 = ITE(f1, g1, h1);
+        return unique(x, r1, r0);
+    }
+
 public:
     explicit BDD(uint32_t num_vars)
             : unique_table(num_vars), num_invoke_and(0u), num_invoke_or(0u),
@@ -346,90 +410,49 @@ public:
     /* Compute f ^ g */
     signal_t XOR(signal_t f, signal_t g) {
         ++num_invoke_xor;
-        return cached_computation(computed_table_AND, f, g, [this] (signal_t f, signal_t g) -> signal_t {
-            return XOR_INTERNAL(f, g);
-        });
+        return cached_computation(
+                computed_table_XOR,
+                std::tuple<signal_t, signal_t>(f, g),
+                std::tuple<signal_t, signal_t>(g, f),
+                [this, f, g]() -> signal_t {
+                    return XOR_INTERNAL(f, g);
+                });
     }
 
     /* Compute f & g */
     signal_t AND(signal_t f, signal_t g) {
         ++num_invoke_and;
-        return cached_computation(computed_table_AND, f, g, [this] (signal_t f, signal_t g) -> signal_t {
-            return AND_INTERNAL(f, g);
-        });
+        return cached_computation(
+                computed_table_AND,
+                std::tuple<signal_t, signal_t>(f, g),
+                std::tuple<signal_t, signal_t>(g, f),
+                [this, f, g]() -> signal_t {
+                    return AND_INTERNAL(f, g);
+                });
     }
 
     /* Compute f | g */
     signal_t OR(signal_t f, signal_t g) {
         ++num_invoke_or;
-        return cached_computation(computed_table_OR, f, g, [this] (signal_t f, signal_t g) -> signal_t {
-            return OR_INTERNAL(f, g);
-        });
+        return cached_computation(
+                computed_table_OR,
+                std::tuple<signal_t, signal_t>(f, g),
+                std::tuple<signal_t, signal_t>(g, f),
+                [this, f, g]() -> signal_t {
+                    return OR_INTERNAL(f, g);
+                });
     }
 
     /* Compute ITE(f, g, h), i.e., f ? g : h */
     signal_t ITE(signal_t f, signal_t g, signal_t h) {
         ++num_invoke_ite;
-        Node const &F = get_node(f);
-        Node const &G = get_node(g);
-        Node const &H = get_node(h);
-
-        /* trivial cases */
-        if (f == constant(true)) {
-            return g;
-        }
-        if (f == constant(false)) {
-            return h;
-        }
-        if (g == h) {
-            return g;
-        }
-
-        var_t x;
-        signal_t f0, f1, g0, g1, h0, h1;
-        if (F.v <= G.v && F.v <= H.v) /* F is not lower than both G and H */
-        {
-            x = F.v;
-            f0 = F.E;
-            f1 = F.T;
-            if (G.v == F.v) {
-                g0 = G.E;
-                g1 = G.T;
-            } else {
-                g0 = g1 = g;
-            }
-            if (H.v == F.v) {
-                h0 = H.E;
-                h1 = H.T;
-            } else {
-                h0 = h1 = h;
-            }
-        } else /* F.v > min(G.v, H.v) */
-        {
-            f0 = f1 = f;
-            if (G.v < H.v) {
-                x = G.v;
-                g0 = G.E;
-                g1 = G.T;
-                h0 = h1 = h;
-            } else if (H.v < G.v) {
-                x = H.v;
-                g0 = g1 = g;
-                h0 = H.E;
-                h1 = H.T;
-            } else /* G.v == H.v */
-            {
-                x = G.v;
-                g0 = G.E;
-                g1 = G.T;
-                h0 = H.E;
-                h1 = H.T;
-            }
-        }
-
-        signal_t const r0 = ITE(f0, g0, h0);
-        signal_t const r1 = ITE(f1, g1, h1);
-        return unique(x, r1, r0);
+        return cached_computation(
+                computed_table_ITE,
+                std::tuple<signal_t, signal_t, signal_t>(f, g, h),
+                std::tuple<signal_t, signal_t, signal_t>(NOT(f), h, g),
+                [this, f, g, h]() -> signal_t {
+                    return ITE_INTERNAL(f, g, h);
+                });
     }
 
     /**********************************************************/
