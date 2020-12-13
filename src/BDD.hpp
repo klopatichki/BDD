@@ -282,9 +282,6 @@ private:
         if (g == h) {
             return g;
         }
-        if (g == NOT(h)) {
-            return NOT(XOR(f, g));
-        }
 
         var_t x;
         signal_t f0, f1, g0, g1, h0, h1;
@@ -413,7 +410,6 @@ public:
 
     /* Compute ~f */
     signal_t NOT(signal_t f) {
-        // increase count
         return f ^ COMPLEMENT_MASK;
     }
 
