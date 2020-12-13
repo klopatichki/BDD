@@ -56,18 +56,15 @@ inline uint8_t power_two( const uint32_t n ) {
 
 class Truth_Table {
 public:
-    Truth_Table(uint8_t num_var)
-            : num_var(num_var), bits(0u) {
+    explicit Truth_Table(uint8_t num_var): num_var(num_var), bits(0u) {
         assert(num_var <= 6u);
     }
 
-    Truth_Table(uint8_t num_var, uint64_t bits)
-            : num_var(num_var), bits(bits & length_mask[num_var]) {
+    Truth_Table(uint8_t num_var, uint64_t bits): num_var(num_var), bits(bits & length_mask[num_var]) {
         assert(num_var <= 6u);
     }
 
-    Truth_Table(const std::string str)
-            : num_var(power_two(str.size())), bits(0u) {
+    explicit Truth_Table(const std::string& str): num_var(power_two(str.size())), bits(0u) {
         if (num_var == 0u) {
             return;
         }
