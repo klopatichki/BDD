@@ -36,22 +36,15 @@ static const uint64_t var_mask_neg[] = {
 
 /* return i if n == 2^i and i <= 6, 0 otherwise */
 inline uint8_t power_two( const uint32_t n ) {
-    switch (n) {
-        case 2u:
-            return 1u;
-        case 4u:
-            return 2u;
-        case 8u:
-            return 3u;
-        case 16u:
-            return 4u;
-        case 32u:
-            return 5u;
-        case 64u:
-            return 6u;
-        default:
-            return 0u;
+    uint8_t i = 1;
+    uint32_t j;
+    for (j = 2; j < n && j > 0; j = j << 1) {
+        i++;
     }
+    if (j == n) {
+        return i;
+    }
+    return 0;
 }
 
 class Truth_Table {
