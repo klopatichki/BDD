@@ -101,6 +101,10 @@ private:
         return signal & COMPLEMENT_MASK;
     }
 
+    static inline signal_t complement(signal_t signal, bool should_complement) {
+        return signal ^ (should_complement ? COMPLEMENT_MASK : 0);
+    }
+
     template<class Key>
     inline static signal_t cached_computation(
             std::unordered_map<Key, signal_t> &cache,
@@ -120,6 +124,8 @@ private:
     signal_t AND_INTERNAL(signal_t f, signal_t g) {
         Node const &F = get_node(f);
         Node const &G = get_node(g);
+        auto is_f_complemented = is_complemented(f);
+        auto is_g_complemented = is_complemented(g);
 
         /* trivial cases */
         if (f == constant(false) || g == constant(false)) {
@@ -143,22 +149,22 @@ private:
         if (F.v < G.v) /* F is on top of G */
         {
             x = F.v;
-            f0 = F.E;
-            f1 = F.T;
+            f0 = complement(F.E, is_f_complemented);
+            f1 = complement(F.T, is_f_complemented);
             g0 = g1 = g;
         } else if (G.v < F.v) /* G is on top of F */
         {
             x = G.v;
             f0 = f1 = f;
-            g0 = G.E;
-            g1 = G.T;
+            g0 = complement(G.E, is_g_complemented);
+            g1 = complement(G.T, is_g_complemented);
         } else /* F and G are at the same level */
         {
             x = F.v;
-            f0 = F.E;
-            f1 = F.T;
-            g0 = G.E;
-            g1 = G.T;
+            f0 = complement(F.E, is_f_complemented);
+            f1 = complement(F.T, is_f_complemented);
+            g0 = complement(G.E, is_g_complemented);
+            g1 = complement(G.T, is_g_complemented);
         }
 
         signal_t const r0 = AND(f0, g0);
