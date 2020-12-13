@@ -176,7 +176,7 @@ inline Truth_Table Truth_Table::smoothing( uint8_t const var ) const {
     return positive_cofactor(var) | negative_cofactor(var);
 }
 
-/* Returns the truth table of f(x_0, ..., x_num_var) = x_var (or its complement). */
+/* Returns the truth table of f(x_0, ..., x_num_var) = x_var (or its mask). */
 inline Truth_Table create_tt_nth_var( uint8_t const num_var, uint8_t const var, bool const polarity = true ) {
     assert (num_var <= 6u && var < num_var);
     return Truth_Table(num_var, polarity ? var_mask_pos[var] : var_mask_neg[var]);
