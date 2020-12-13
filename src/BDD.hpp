@@ -371,12 +371,12 @@ public:
 
         /* Look up in the unique table. */
         const auto original_position = unique_table[var].find({T, E});
-        const auto complemented_position = unique_table[var].find({E, T});
+//        const auto complemented_position = unique_table[var].find({E, T});
         if (original_position != unique_table[var].end()) {
             /* The required node already exists. Return original_position. */
             return make_signal(original_position->second);
-        } else if (complemented_position != unique_table[var].end()) {
-            return make_signal(complemented_position->second, true);
+//        } else if (complemented_position != unique_table[var].end()) {
+//            return make_signal(complemented_position->second, true);
         } else {
             /* Create a new node, insert original_position to the unique table and increment ref count for children. */
             ref(T);
