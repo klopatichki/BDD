@@ -354,7 +354,6 @@ public:
 
         /* Reduction rule: Identical children */
         if (T == E) {
-            // what to do with references
             return T;
         }
 
@@ -367,7 +366,9 @@ public:
         } else if (complemented_position != unique_table[var].end()) {
             return make_signal(complemented_position->second, true);
         } else {
-            /* Create a new node and insert original_position to the unique table. */
+            /* Create a new node, insert original_position to the unique table and increment ref count for children. */
+            ref(T);
+            ref(E);
             index_t const new_index = nodes.size();
             nodes.emplace_back(Node({var, T, E}));
             refs.emplace_back(0);
