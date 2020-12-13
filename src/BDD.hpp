@@ -121,11 +121,16 @@ private:
         return result;
     }
 
+    static signal_t mask_branch(signal_t f, signal_t branch) {
+        if (f == branch) {
+            return branch;
+        }
+        return mask(branch, branch_mask(f));
+    }
+
     signal_t AND_INTERNAL(signal_t f, signal_t g) {
         Node const &F = get_node(f);
         Node const &G = get_node(g);
-        auto f_mask = branch_mask(f);
-        auto g_mask = branch_mask(g);
 
         /* trivial cases */
         if (f == constant(false) || g == constant(false)) {
@@ -149,26 +154,26 @@ private:
         if (F.v < G.v) /* F is on top of G */
         {
             x = F.v;
-            f0 = mask(F.E, f_mask);
-            f1 = mask(F.T, f_mask);
+            f0 = F.E;
+            f1 = F.T;
             g0 = g1 = g;
         } else if (G.v < F.v) /* G is on top of F */
         {
             x = G.v;
             f0 = f1 = f;
-            g0 = mask(G.E, g_mask);
-            g1 = mask(G.T, g_mask);
+            g0 = G.E;
+            g1 = G.T;
         } else /* F and G are at the same level */
         {
             x = F.v;
-            f0 = mask(F.E, f_mask);
-            f1 = mask(F.T, f_mask);
-            g0 = mask(G.E, g_mask);
-            g1 = mask(G.T, g_mask);
+            f0 = F.E;
+            f1 = F.T;
+            g0 = G.E;
+            g1 = G.T;
         }
 
-        signal_t const r0 = AND(f0, g0);
-        signal_t const r1 = AND(f1, g1);
+        signal_t const r0 = AND(mask_branch(f, f0), mask_branch(g, g0));
+        signal_t const r1 = AND(mask_branch(f, f1), mask_branch(g, g1));
         return unique(x, r1, r0);
     }
 
