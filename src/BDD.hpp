@@ -64,7 +64,7 @@ public:
     /* A signal represents an edge pointing to a node.
      * The first 31 bits store the index of the node,
      * and the last bit records whether the edge is complemented or not.
-     * See below `make_signal`, `get_index` and `is_complemented`. */
+     * See below `make_signal`, `get_index` and `branch_mask`. */
 
     using var_t = uint32_t;
     /* Declare `var_t` as an alias for an unsigned integer.
@@ -97,12 +97,12 @@ private:
         return nodes[get_index(signal)];
     }
 
-    static inline bool is_complemented(signal_t signal) {
+    static inline index_t branch_mask(signal_t signal) {
         return signal & COMPLEMENT_MASK;
     }
 
-    static inline signal_t complement(signal_t signal, bool should_complement) {
-        return signal ^ (should_complement ? COMPLEMENT_MASK : 0);
+    static inline signal_t mask(signal_t signal, index_t bit_mask) {
+        return signal ^ bit_mask;
     }
 
     template<class Key>
@@ -124,8 +124,8 @@ private:
     signal_t AND_INTERNAL(signal_t f, signal_t g) {
         Node const &F = get_node(f);
         Node const &G = get_node(g);
-        auto is_f_complemented = is_complemented(f);
-        auto is_g_complemented = is_complemented(g);
+        auto f_mask = branch_mask(f);
+        auto g_mask = branch_mask(g);
 
         /* trivial cases */
         if (f == constant(false) || g == constant(false)) {
@@ -149,22 +149,22 @@ private:
         if (F.v < G.v) /* F is on top of G */
         {
             x = F.v;
-            f0 = complement(F.E, is_f_complemented);
-            f1 = complement(F.T, is_f_complemented);
+            f0 = mask(F.E, f_mask);
+            f1 = mask(F.T, f_mask);
             g0 = g1 = g;
         } else if (G.v < F.v) /* G is on top of F */
         {
             x = G.v;
             f0 = f1 = f;
-            g0 = complement(G.E, is_g_complemented);
-            g1 = complement(G.T, is_g_complemented);
+            g0 = mask(G.E, g_mask);
+            g1 = mask(G.T, g_mask);
         } else /* F and G are at the same level */
         {
             x = F.v;
-            f0 = complement(F.E, is_f_complemented);
-            f1 = complement(F.T, is_f_complemented);
-            g0 = complement(G.E, is_g_complemented);
-            g1 = complement(G.T, is_g_complemented);
+            f0 = mask(F.E, f_mask);
+            f1 = mask(F.T, f_mask);
+            g0 = mask(G.E, g_mask);
+            g1 = mask(G.T, g_mask);
         }
 
         signal_t const r0 = AND(f0, g0);
@@ -398,6 +398,13 @@ public:
     /*********************** Ref & Deref **********************/
     /**********************************************************/
     signal_t ref(signal_t f) {
+        if (f == constant(true)) {
+            return f;
+        }
+        if (f == constant(false)) {
+            return f;
+        }
+
         auto index = get_index(f);
         assert(index < refs.size());
         refs[index] += 1;
@@ -405,9 +412,21 @@ public:
     }
 
     void deref(signal_t f) {
+        if (f == constant(true)) {
+            return;
+        }
+        if (f == constant(false)) {
+            return;
+        }
+
         auto index = get_index(f);
         assert(index < refs.size() && refs[index] > 0);
         refs[index] -= 1;
+        if (refs[index] == 0) {
+            auto node = get_node(f);
+            deref(node.E);
+            deref(node.T);
+        }
     }
 
     /**********************************************************/
@@ -480,7 +499,7 @@ public:
         if (f <= 1) {
             os << "constant " << (f ? "0" : "1") << std::endl;
         } else {
-            if (is_complemented(f)) {
+            if (branch_mask(f)) {
                 os << "!";
             } else {
                 os << " ";
@@ -517,7 +536,7 @@ public:
         signal_t const fnx = F.E;
         Truth_Table const tt_x = create_tt_nth_var(num_vars(), x);
         Truth_Table const tt_nx = create_tt_nth_var(num_vars(), x, false);
-        if (is_complemented(f)) {
+        if (branch_mask(f)) {
             return ~((tt_x & get_tt(fx)) | (tt_nx & get_tt(fnx)));
         } else {
             return (tt_x & get_tt(fx)) | (tt_nx & get_tt(fnx));
