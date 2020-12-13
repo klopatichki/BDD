@@ -221,8 +221,8 @@ private:
             g1 = G.T;
         }
 
-        signal_t const r0 = OR(f0, g0);
-        signal_t const r1 = OR(f1, g1);
+        signal_t const r0 = OR(mask_branch(f, f0), mask_branch(g, g0));
+        signal_t const r1 = OR(mask_branch(f, f1), mask_branch(g, g1));
         return unique(x, r1, r0);
     }
 
@@ -273,8 +273,8 @@ private:
             g1 = G.T;
         }
 
-        signal_t const r0 = XOR(f0, g0);
-        signal_t const r1 = XOR(f1, g1);
+        signal_t const r0 = XOR(mask_branch(f, f0), mask_branch(g, g0));
+        signal_t const r1 = XOR(mask_branch(f, f1), mask_branch(g, g1));
         return unique(x, r1, r0);
     }
 
@@ -336,8 +336,8 @@ private:
             }
         }
 
-        signal_t const r0 = ITE(f0, g0, h0);
-        signal_t const r1 = ITE(f1, g1, h1);
+        signal_t const r0 = ITE(mask_branch(f, f0), mask_branch(g, g0), mask_branch(h, h0));
+        signal_t const r1 = ITE(mask_branch(f, f1), mask_branch(g, g1), mask_branch(h, h1));
         return unique(x, r1, r0);
     }
 
