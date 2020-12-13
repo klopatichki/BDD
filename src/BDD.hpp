@@ -76,14 +76,16 @@ private:
      * This is just for easier understanding of the code.
      * This datatype will be used for node indices. */
 
+    static const index_t COMPLEMENT_MASK = 0x1;
+
     struct Node {
         var_t v; /* corresponding variable */
         signal_t T; /* signal of THEN child (should not be complemented) */
         signal_t E; /* signal of ELSE child */
     };
 
-    inline signal_t make_signal(index_t index, bool complement = false) const {
-        return complement ? (index << 1) + 1 : index << 1;
+    static inline signal_t make_signal(index_t index, bool complement = false) {
+        return complement ? (index << 1) | COMPLEMENT_MASK : index << 1;
     }
 
     inline index_t get_index(signal_t signal) const {
@@ -95,8 +97,8 @@ private:
         return nodes[get_index(signal)];
     }
 
-    inline bool is_complemented(signal_t signal) const {
-        return signal & 0x1;
+    static inline bool is_complemented(signal_t signal) {
+        return signal & COMPLEMENT_MASK;
     }
 
 public:
@@ -117,7 +119,7 @@ public:
 
     /* Get the constant signal. */
     signal_t constant(bool value) const {
-        /* TODO */
+        return 0 | (value ? 0 : COMPLEMENT_MASK);
     }
 
     /* Look up (if exist) or build (if not) the node with variable `var`,
@@ -172,7 +174,7 @@ public:
 
     /* Compute ~f */
     signal_t NOT(signal_t f) {
-        /* TODO */
+        return f ^ COMPLEMENT_MASK;
     }
 
     /* Compute f ^ g */
