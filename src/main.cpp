@@ -103,35 +103,35 @@ int main() {
 //        passed &= checkEQ(bdd.num_nodes(), 2);
 //    }
 //
-//    {
-//        cout << "test 04: ITE(x2, x1, x0) AND ITE(x0, x2 AND NOT x1, x1 XOR x2)" << endl;
-//        BDD bdd(3);
-//        auto const x0 = bdd.ref(bdd.literal(0));
-//        auto const x1 = bdd.ref(bdd.literal(1));
-//        auto const x2 = bdd.ref(bdd.literal(2));
-//
-//        auto const f1 = bdd.ref(bdd.ITE(x2, x1, x0));
-//
-//        auto const g = bdd.ref(bdd.AND(x2, bdd.NOT(x1)));
-//        auto const h = bdd.ref(bdd.XOR(x1, x2));
-//        auto const f2 = bdd.ref(bdd.ITE(x0, g, h));
-//        bdd.deref(g);
-//        bdd.deref(h);
-//        bdd.deref(x0);
-//        bdd.deref(x1);
-//        bdd.deref(x2);
-//
-//        auto const f = bdd.ref(bdd.AND(f1, f2));
-//        bdd.deref(f1);
-//        bdd.deref(f2);
-//
-//        auto const tt = bdd.get_tt(f);
-//        passed &= check(tt, "00000000");
-//        cout << "  checking BDD size (reachable nodes)";
-//        passed &= checkEQ(bdd.num_nodes(f), 0);
-//        cout << "  checking BDD size (living nodes)";
-//        passed &= checkEQ(bdd.num_nodes(), 0);
-//    }
+    {
+        cout << "test 04: ITE(x2, x1, x0) AND ITE(x0, x2 AND NOT x1, x1 XOR x2)" << endl;
+        BDD bdd(3);
+        auto const x0 = bdd.ref(bdd.literal(0));
+        auto const x1 = bdd.ref(bdd.literal(1));
+        auto const x2 = bdd.ref(bdd.literal(2));
+
+        auto const f1 = bdd.ref(bdd.ITE(x2, x1, x0));
+
+        auto const g = bdd.ref(bdd.AND(x2, bdd.NOT(x1)));
+        auto const h = bdd.ref(bdd.XOR(x1, x2));
+        auto const f2 = bdd.ref(bdd.ITE(x0, g, h));
+        bdd.deref(g);
+        bdd.deref(h);
+        bdd.deref(x0);
+        bdd.deref(x1);
+        bdd.deref(x2);
+
+        auto const f = bdd.ref(bdd.AND(f1, f2));
+        bdd.deref(f1);
+        bdd.deref(f2);
+
+        auto const tt = bdd.get_tt(f);
+        passed &= check(tt, "00000000");
+        cout << "  checking BDD size (reachable nodes)";
+        passed &= checkEQ(bdd.num_nodes(f), 0);
+        cout << "  checking BDD size (living nodes)";
+        passed &= checkEQ(bdd.num_nodes(), 0);
+    }
 //
 //    {
 //        cout << "test 05: ITE(x2 AND x3, x1 AND NOT x0, NOT x2 AND NOT x4)" << endl;
@@ -281,7 +281,7 @@ int main() {
         auto const f = bdd.ref(bdd.AND(x2, bdd.AND(x0, bdd.NOT(x1))));
 
         auto const tt = bdd.get_tt(f);
-        check(tt, "00000100");
+        check(tt, "00100000");
     }
 
     if (passed) {
