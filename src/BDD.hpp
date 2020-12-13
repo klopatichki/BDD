@@ -351,7 +351,7 @@ public:
 
     /* Get the constant signal. */
     signal_t constant(bool value) const {
-        return 0 | (value ? 0 : COMPLEMENT_MASK);
+        return value ? COMPLEMENT_MASK : 0;
     }
 
     /* Look up (if exist) or build (if not) the node with variable `var`,
