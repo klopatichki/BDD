@@ -105,7 +105,7 @@ public:
         }
     }
 
-    bool get_bit(uint64_t block, uint8_t const position) const {
+    static bool get_bit(uint64_t block, uint8_t const position) {
         assert(position < (1 << 6));
         return ((block >> position) & 0x1);
     }
@@ -116,7 +116,7 @@ public:
         }
     }
 
-    uint64_t set_bit(uint64_t block, uint8_t const position) {
+    uint64_t set_bit(uint64_t block, uint8_t const position) const {
         assert(position < (1 << 6));
         block |= (uint64_t(1) << position);
         if (num_var >= 6)
@@ -128,24 +128,12 @@ public:
         return num_var;
     }
 
-//    Truth_Table positive_cofactor(uint8_t const var) const;
-//
-//    Truth_Table negative_cofactor(uint8_t const var) const;
-//
-//    Truth_Table derivative(uint8_t const var) const;
-//
-//    Truth_Table consensus(uint8_t const var) const;
-//
-//    Truth_Table smoothing(uint8_t const var) const;
-
 public:
     uint32_t const num_var; /* number of variables involved in the function */
     std::map<std::vector<bool>, uint64_t> bits; /* the truth table, indexed by variables with index greater than 6*/
 };
 
-//void write_block(std::ostream &ostream, uint64_t block);
-
-inline std::ostream& write_blocks(std::ostream& os, Truth_Table const& tt, std::vector<bool> index) {
+inline std::ostream& write_blocks(std::ostream& os, Truth_Table const& tt, const std::vector<bool>& index) {
     if (index.size() <= tt.num_var - 6) {
         tt.write_block(os, tt.bits.find(index)->second);
         return os;
@@ -173,7 +161,7 @@ inline Truth_Table operator~( Truth_Table const& tt ) {
     auto mask = tt.num_var >= 6 ? length_mask[6] : length_mask[tt.num_var];
     std::map<std::vector<bool>, uint64_t> bits;
     for (const auto& pair: tt.bits) {
-        bits[pair.first] = pair.second & mask;
+        bits[pair.first] = (~pair.second) & mask;
     }
     return Truth_Table(tt.num_var, bits);
 }

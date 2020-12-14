@@ -64,25 +64,25 @@ int main() {
 //        }
 //    }
 
-    {
-        cout << "test 01: computed table" << endl;
-        BDD bdd(2);
-        auto const x0 = bdd.ref(bdd.literal(0));
-        auto const x1 = bdd.ref(bdd.literal(1));
-        auto const g = bdd.ref(bdd.AND(x0, x1));
-        auto const h = bdd.ref(bdd.AND(x0, x1));
-        bdd.deref(x0);
-        bdd.deref(x1);
-
-        auto const f = bdd.ref(bdd.XOR(g, h));
-        bdd.deref(g);
-        bdd.deref(h);
-        auto const tt = bdd.get_tt(f);
-
-        passed &= check(tt, "0000");
-        cout << "  checking number of computation";
-        passed &= checkLE(bdd.num_invoke(), 5);
-    }
+//    {
+//        cout << "test 01: computed table" << endl;
+//        BDD bdd(2);
+//        auto const x0 = bdd.ref(bdd.literal(0));
+//        auto const x1 = bdd.ref(bdd.literal(1));
+//        auto const g = bdd.ref(bdd.AND(x0, x1));
+//        auto const h = bdd.ref(bdd.AND(x0, x1));
+//        bdd.deref(x0);
+//        bdd.deref(x1);
+//
+//        auto const f = bdd.ref(bdd.XOR(g, h));
+//        bdd.deref(g);
+//        bdd.deref(h);
+//        auto const tt = bdd.get_tt(f);
+//
+//        passed &= check(tt, "0000");
+//        cout << "  checking number of computation";
+//        passed &= checkLE(bdd.num_invoke(), 5);
+//    }
 
     {
         cout << "test 02: complemented edges" << endl;
@@ -103,65 +103,65 @@ int main() {
         passed &= checkEQ(bdd.num_nodes(), 2);
     }
 
-    {
-        cout << "test 04: ITE(x2, x1, x0) AND ITE(x0, x2 AND NOT x1, x1 XOR x2)" << endl;
-        BDD bdd(3);
-        auto const x0 = bdd.ref(bdd.literal(0));
-        auto const x1 = bdd.ref(bdd.literal(1));
-        auto const x2 = bdd.ref(bdd.literal(2));
-
-        auto const f1 = bdd.ref(bdd.ITE(x2, x1, x0));
-
-        auto const g = bdd.ref(bdd.AND(x2, bdd.NOT(x1)));
-        auto const h = bdd.ref(bdd.XOR(x1, x2));
-        auto const f2 = bdd.ref(bdd.ITE(x0, g, h));
-        bdd.deref(g);
-        bdd.deref(h);
-        bdd.deref(x0);
-        bdd.deref(x1);
-        bdd.deref(x2);
-
-        auto const f = bdd.ref(bdd.AND(f1, f2));
-        bdd.deref(f1);
-        bdd.deref(f2);
-
-        auto const tt = bdd.get_tt(f);
-        passed &= check(tt, "00000000");
-        cout << "  checking BDD size (reachable nodes)";
-        passed &= checkEQ(bdd.num_nodes(f), 0);
-        cout << "  checking BDD size (living nodes)";
-        passed &= checkEQ(bdd.num_nodes(), 0);
-    }
-
-    {
-        cout << "test 05: ITE(x2 AND x3, x1 AND NOT x0, NOT x2 AND NOT x4)" << endl;
-        BDD bdd(5);
-        auto const x0 = bdd.ref(bdd.literal(0));
-        auto const x1 = bdd.ref(bdd.literal(1));
-        auto const x2 = bdd.ref(bdd.literal(2));
-        auto const x3 = bdd.ref(bdd.literal(3));
-        auto const x4 = bdd.ref(bdd.literal(4));
-        auto const f1 = bdd.ref(bdd.AND(x2, x3));
-        auto const f2 = bdd.ref(bdd.AND(x1, bdd.NOT(x0)));
-        auto const f3 = bdd.ref(bdd.AND(bdd.NOT(x2), bdd.NOT(x4)));
-        bdd.deref(x0);
-        bdd.deref(x1);
-        bdd.deref(x2);
-        bdd.deref(x3);
-        bdd.deref(x4);
-
-        auto const f = bdd.ref(bdd.ITE(f1, f2, f3));
-        bdd.deref(f1);
-        bdd.deref(f2);
-        bdd.deref(f3);
-
-        auto const tt = bdd.get_tt(f);
-        check(tt, "01000000000000000100111100001111");
-        cout << "  checking BDD size (reachable nodes)";
-        passed &= checkEQ(bdd.num_nodes(f), 6);
-        cout << "  checking BDD size (living nodes)";
-        passed &= checkEQ(bdd.num_nodes(), 6);
-    }
+//    {
+//        cout << "test 04: ITE(x2, x1, x0) AND ITE(x0, x2 AND NOT x1, x1 XOR x2)" << endl;
+//        BDD bdd(3);
+//        auto const x0 = bdd.ref(bdd.literal(0));
+//        auto const x1 = bdd.ref(bdd.literal(1));
+//        auto const x2 = bdd.ref(bdd.literal(2));
+//
+//        auto const f1 = bdd.ref(bdd.ITE(x2, x1, x0));
+//
+//        auto const g = bdd.ref(bdd.AND(x2, bdd.NOT(x1)));
+//        auto const h = bdd.ref(bdd.XOR(x1, x2));
+//        auto const f2 = bdd.ref(bdd.ITE(x0, g, h));
+//        bdd.deref(g);
+//        bdd.deref(h);
+//        bdd.deref(x0);
+//        bdd.deref(x1);
+//        bdd.deref(x2);
+//
+//        auto const f = bdd.ref(bdd.AND(f1, f2));
+//        bdd.deref(f1);
+//        bdd.deref(f2);
+//
+//        auto const tt = bdd.get_tt(f);
+//        passed &= check(tt, "00000000");
+//        cout << "  checking BDD size (reachable nodes)";
+//        passed &= checkEQ(bdd.num_nodes(f), 0);
+//        cout << "  checking BDD size (living nodes)";
+//        passed &= checkEQ(bdd.num_nodes(), 0);
+//    }
+//
+//    {
+//        cout << "test 05: ITE(x2 AND x3, x1 AND NOT x0, NOT x2 AND NOT x4)" << endl;
+//        BDD bdd(5);
+//        auto const x0 = bdd.ref(bdd.literal(0));
+//        auto const x1 = bdd.ref(bdd.literal(1));
+//        auto const x2 = bdd.ref(bdd.literal(2));
+//        auto const x3 = bdd.ref(bdd.literal(3));
+//        auto const x4 = bdd.ref(bdd.literal(4));
+//        auto const f1 = bdd.ref(bdd.AND(x2, x3));
+//        auto const f2 = bdd.ref(bdd.AND(x1, bdd.NOT(x0)));
+//        auto const f3 = bdd.ref(bdd.AND(bdd.NOT(x2), bdd.NOT(x4)));
+//        bdd.deref(x0);
+//        bdd.deref(x1);
+//        bdd.deref(x2);
+//        bdd.deref(x3);
+//        bdd.deref(x4);
+//
+//        auto const f = bdd.ref(bdd.ITE(f1, f2, f3));
+//        bdd.deref(f1);
+//        bdd.deref(f2);
+//        bdd.deref(f3);
+//
+//        auto const tt = bdd.get_tt(f);
+//        check(tt, "01000000000000000100111100001111");
+//        cout << "  checking BDD size (reachable nodes)";
+//        passed &= checkEQ(bdd.num_nodes(f), 6);
+//        cout << "  checking BDD size (living nodes)";
+//        passed &= checkEQ(bdd.num_nodes(), 6);
+//    }
 
 //    {
 //        cout << "test 06: more than 6 variables & multiple POs" << endl;
