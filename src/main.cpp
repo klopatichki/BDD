@@ -51,18 +51,18 @@ bool checkEQ( uint64_t actual, uint64_t expected ) {
 
 int main() {
     bool passed = true;
-//    {
-//        cout << "test 00: large truth table";
-//        Truth_Table tt(
-//                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-//
-//        if (tt.n_var() == 7) {
-//            cout << "...passed." << endl;
-//        } else {
-//            cout << "...failed." << endl;
-//            passed = false;
-//        }
-//    }
+    {
+        cout << "test 00: large truth table";
+        Truth_Table tt(
+                "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
+        if (tt.n_var() == 7) {
+            cout << "...passed." << endl;
+        } else {
+            cout << "...failed." << endl;
+            passed = false;
+        }
+    }
 
     {
         cout << "test 01: computed table" << endl;
@@ -163,57 +163,57 @@ int main() {
         passed &= checkEQ(bdd.num_nodes(), 6);
     }
 
-//    {
-//        cout << "test 06: more than 6 variables & multiple POs" << endl;
-//        BDD bdd(10);
-//        auto const x0 = bdd.ref(bdd.literal(0));
-//        auto const x1 = bdd.ref(bdd.literal(1));
-//        auto const x2 = bdd.ref(bdd.literal(2));
-//        auto const x3 = bdd.ref(bdd.literal(3));
-//        auto const x4 = bdd.ref(bdd.literal(4));
-//        auto const x5 = bdd.ref(bdd.literal(5));
-//        auto const x6 = bdd.ref(bdd.literal(6));
-//        auto const x7 = bdd.ref(bdd.literal(7));
-//        auto const x8 = bdd.ref(bdd.literal(8));
-//        auto const x9 = bdd.ref(bdd.literal(9));
-//
-//        auto const f1 = bdd.ref(bdd.OR(x0, x9));
-//
-//        auto const g1 = bdd.ref(bdd.AND(x6, bdd.NOT(x4)));
-//        auto const g2 = bdd.ref(bdd.AND(x4, bdd.NOT(x6)));
-//        auto const f2 = bdd.ref(bdd.OR(g1, g2));
-//        bdd.deref(g1);
-//        bdd.deref(g2);
-//
-//        auto const f3 = bdd.ref(bdd.ITE(x6, bdd.NOT(x2), bdd.NOT(x6)));
-//
-//        bdd.deref(x0);
-//        bdd.deref(x1);
-//        bdd.deref(x2);
-//        bdd.deref(x3);
-//        bdd.deref(x4);
-//        bdd.deref(x5);
-//        bdd.deref(x6);
-//        bdd.deref(x7);
-//        bdd.deref(x8);
-//        bdd.deref(x9);
-//
-//        auto const tt1 = bdd.get_tt(f1);
-//        check(tt1, create_tt_nth_var(10, 0) | create_tt_nth_var(10, 9));
-//        auto const tt2 = bdd.get_tt(f2);
-//        check(tt2, create_tt_nth_var(10, 4) ^ create_tt_nth_var(10, 6));
-//        auto const tt3 = bdd.get_tt(f3);
-//        check(tt3, ~create_tt_nth_var(10, 2) | ~create_tt_nth_var(10, 6));
-//
-//        cout << "  checking BDD size (reachable nodes) of f1";
-//        passed &= checkEQ(bdd.num_nodes(f1), 2);
-//        cout << "  checking BDD size (reachable nodes) of f2";
-//        passed &= checkEQ(bdd.num_nodes(f2), 2);
-//        cout << "  checking BDD size (reachable nodes) of f3";
-//        passed &= checkEQ(bdd.num_nodes(f3), 2);
-//        cout << "  checking BDD size (living nodes)";
-//        passed &= checkEQ(bdd.num_nodes(), 5);
-//    }
+    {
+        cout << "test 06: more than 6 variables & multiple POs" << endl;
+        BDD bdd(10);
+        auto const x0 = bdd.ref(bdd.literal(0));
+        auto const x1 = bdd.ref(bdd.literal(1));
+        auto const x2 = bdd.ref(bdd.literal(2));
+        auto const x3 = bdd.ref(bdd.literal(3));
+        auto const x4 = bdd.ref(bdd.literal(4));
+        auto const x5 = bdd.ref(bdd.literal(5));
+        auto const x6 = bdd.ref(bdd.literal(6));
+        auto const x7 = bdd.ref(bdd.literal(7));
+        auto const x8 = bdd.ref(bdd.literal(8));
+        auto const x9 = bdd.ref(bdd.literal(9));
+
+        auto const f1 = bdd.ref(bdd.OR(x0, x9));
+
+        auto const g1 = bdd.ref(bdd.AND(x6, bdd.NOT(x4)));
+        auto const g2 = bdd.ref(bdd.AND(x4, bdd.NOT(x6)));
+        auto const f2 = bdd.ref(bdd.OR(g1, g2));
+        bdd.deref(g1);
+        bdd.deref(g2);
+
+        auto const f3 = bdd.ref(bdd.ITE(x6, bdd.NOT(x2), bdd.NOT(x6)));
+
+        bdd.deref(x0);
+        bdd.deref(x1);
+        bdd.deref(x2);
+        bdd.deref(x3);
+        bdd.deref(x4);
+        bdd.deref(x5);
+        bdd.deref(x6);
+        bdd.deref(x7);
+        bdd.deref(x8);
+        bdd.deref(x9);
+
+        auto const tt1 = bdd.get_tt(f1);
+        check(tt1, create_tt_nth_var(10, 0) | create_tt_nth_var(10, 9));
+        auto const tt2 = bdd.get_tt(f2);
+        check(tt2, create_tt_nth_var(10, 4) ^ create_tt_nth_var(10, 6));
+        auto const tt3 = bdd.get_tt(f3);
+        check(tt3, ~create_tt_nth_var(10, 2) | ~create_tt_nth_var(10, 6));
+
+        cout << "  checking BDD size (reachable nodes) of f1";
+        passed &= checkEQ(bdd.num_nodes(f1), 2);
+        cout << "  checking BDD size (reachable nodes) of f2";
+        passed &= checkEQ(bdd.num_nodes(f2), 2);
+        cout << "  checking BDD size (reachable nodes) of f3";
+        passed &= checkEQ(bdd.num_nodes(f3), 2);
+        cout << "  checking BDD size (living nodes)";
+        passed &= checkEQ(bdd.num_nodes(), 5);
+    }
 
     {
         cout << "test 07: computed table for XOR" << endl;
