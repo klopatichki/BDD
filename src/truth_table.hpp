@@ -144,6 +144,7 @@ inline std::ostream& write_blocks(std::ostream& os, Truth_Table const& tt, const
     else_index.push_back(false);
     write_blocks(os, tt, then_index);
     write_blocks(os, tt, else_index);
+    return os;
 }
 
 /* overload std::ostream operator for convenient printing */
@@ -213,31 +214,6 @@ inline bool operator==( Truth_Table const& tt1, Truth_Table const& tt2 ) {
 inline bool operator!=( Truth_Table const& tt1, Truth_Table const& tt2 ) {
     return !(tt1 == tt2);
 }
-
-//inline Truth_Table Truth_Table::positive_cofactor( uint8_t const var ) const {
-//    assert(var < num_var);
-//    return Truth_Table(num_var, (bits & var_mask_pos[var]) | ((bits & var_mask_pos[var]) >> (1 << var)));
-//}
-//
-//inline Truth_Table Truth_Table::negative_cofactor( uint8_t const var ) const {
-//    assert(var < num_var);
-//    return Truth_Table(num_var, (bits & var_mask_neg[var]) | ((bits & var_mask_neg[var]) << (1 << var)));
-//}
-
-//inline Truth_Table Truth_Table::derivative( uint8_t const var ) const {
-//    assert(var < num_var);
-//    return positive_cofactor(var) ^ negative_cofactor(var);
-//}
-//
-//inline Truth_Table Truth_Table::consensus( uint8_t const var ) const {
-//    assert(var < num_var);
-//    return positive_cofactor(var) & negative_cofactor(var);
-//}
-//
-//inline Truth_Table Truth_Table::smoothing( uint8_t const var ) const {
-//    assert(var < num_var);
-//    return positive_cofactor(var) | negative_cofactor(var);
-//}
 
 std::map<std::vector<bool>, uint64_t> build_map(
         std::map<std::vector<bool>, uint64_t> map,
