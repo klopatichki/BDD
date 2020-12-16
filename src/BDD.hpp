@@ -71,6 +71,13 @@ public:
      * This datatype will be used for representing variables. */
 
 private:
+    using binary_cache_key = std::tuple<signal_t, signal_t>;
+    using binary_cache_option = std::tuple<const std::unordered_map<binary_cache_key, signal_t> &, binary_cache_key, bool>;
+    using binary_cache_options = std::vector<binary_cache_option>;
+    using ternary_cache_key = std::tuple<signal_t, signal_t, signal_t>;
+    using ternary_cache_option = std::tuple<const std::unordered_map<ternary_cache_key, signal_t> &, ternary_cache_key, bool>;
+    using ternary_cache_options = std::vector<ternary_cache_option>;
+
     using index_t = uint32_t;
     /* Declare `index_t` as an alias for an unsigned integer.
      * This is just for easier understanding of the code.
@@ -107,14 +114,17 @@ private:
 
     template<class Key>
     inline static signal_t cached_computation(
+            const std::vector<std::tuple<const std::unordered_map<Key, signal_t> &, Key, bool>> &pre_computed,
             std::unordered_map<Key, signal_t> &cache,
             const Key &original,
-            const Key &commuted,
             const std::function<signal_t()> &func) {
-        if (cache.find(original) != cache.end()) {
-            return cache.find(original)->second;
-        } else if (cache.find(commuted) != cache.end()) {
-            return cache.find(commuted)->second;
+        for (auto const &option: pre_computed) {
+            const std::unordered_map<Key, signal_t> &cache_option = std::get<0>(option);
+            const Key &key = std::get<1>(option);
+            bool mask = std::get<2>(option);
+            if (cache_option.find(key) != cache_option.end()) {
+                return cache_option.find(key)->second ^ mask;
+            }
         }
         auto result = func();
         cache[original] = result;
@@ -446,10 +456,16 @@ public:
     /* Compute f ^ g */
     signal_t XOR(signal_t f, signal_t g) {
         ++num_invoke_xor;
+
+        binary_cache_options options{
+                binary_cache_option(computed_table_XOR, binary_cache_key(f, g), false),
+                binary_cache_option(computed_table_XOR, binary_cache_key(g, f), false)
+        };
+
         return cached_computation(
+                options,
                 computed_table_XOR,
-                std::tuple<signal_t, signal_t>(f, g),
-                std::tuple<signal_t, signal_t>(g, f),
+                binary_cache_key(f, g),
                 [this, f, g]() -> signal_t {
                     return XOR_INTERNAL(f, g);
                 });
@@ -458,10 +474,16 @@ public:
     /* Compute f & g */
     signal_t AND(signal_t f, signal_t g) {
         ++num_invoke_and;
+
+        binary_cache_options options{
+                binary_cache_option(computed_table_AND, binary_cache_key(f, g), false),
+                binary_cache_option(computed_table_AND, binary_cache_key(g, f), false)
+        };
+
         return cached_computation(
+                options,
                 computed_table_AND,
-                std::tuple<signal_t, signal_t>(f, g),
-                std::tuple<signal_t, signal_t>(g, f),
+                binary_cache_key(f, g),
                 [this, f, g]() -> signal_t {
                     return AND_INTERNAL(f, g);
                 });
@@ -470,10 +492,16 @@ public:
     /* Compute f | g */
     signal_t OR(signal_t f, signal_t g) {
         ++num_invoke_or;
+
+        binary_cache_options options{
+                binary_cache_option(computed_table_OR, binary_cache_key(f, g), false),
+                binary_cache_option(computed_table_OR, binary_cache_key(g, f), false)
+        };
+
         return cached_computation(
+                options,
                 computed_table_OR,
-                std::tuple<signal_t, signal_t>(f, g),
-                std::tuple<signal_t, signal_t>(g, f),
+                binary_cache_key(f, g),
                 [this, f, g]() -> signal_t {
                     return OR_INTERNAL(f, g);
                 });
@@ -482,10 +510,16 @@ public:
     /* Compute ITE(f, g, h), i.e., f ? g : h */
     signal_t ITE(signal_t f, signal_t g, signal_t h) {
         ++num_invoke_ite;
+
+        ternary_cache_options options{
+                ternary_cache_option(computed_table_ITE, ternary_cache_key(f, g, h), false),
+                ternary_cache_option(computed_table_ITE, ternary_cache_key(NOT(f), h, g), false)
+        };
+
         return cached_computation(
+                options,
                 computed_table_ITE,
-                std::tuple<signal_t, signal_t, signal_t>(f, g, h),
-                std::tuple<signal_t, signal_t, signal_t>(NOT(f), h, g),
+                ternary_cache_key(f, g, h),
                 [this, f, g, h]() -> signal_t {
                     return ITE_INTERNAL(f, g, h);
                 });
@@ -610,10 +644,10 @@ private:
      * See the implementation of `unique` for example usage. */
 
     /* Computed tables for each operation type. */
-    std::unordered_map<std::tuple<signal_t, signal_t>, signal_t> computed_table_AND;
-    std::unordered_map<std::tuple<signal_t, signal_t>, signal_t> computed_table_OR;
-    std::unordered_map<std::tuple<signal_t, signal_t>, signal_t> computed_table_XOR;
-    std::unordered_map<std::tuple<signal_t, signal_t, signal_t>, signal_t> computed_table_ITE;
+    std::unordered_map<binary_cache_key, signal_t> computed_table_AND;
+    std::unordered_map<binary_cache_key, signal_t> computed_table_OR;
+    std::unordered_map<binary_cache_key, signal_t> computed_table_XOR;
+    std::unordered_map<ternary_cache_key, signal_t> computed_table_ITE;
 
     /* statistics */
     uint64_t num_invoke_and, num_invoke_or, num_invoke_xor, num_invoke_ite;
