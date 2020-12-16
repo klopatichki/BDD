@@ -52,7 +52,7 @@ Selection the operation cache is done based on the functional equivalence of pos
 This means that we are able to use laws of commutativity, De Morgan's laws, etc. to reduce the number of created nodes.
 As a result we can check if the following have been previously computed, for each operation:
 
-- AND(f, g): AND(f, g), AND(g, f), OR(NOT(F), NOT(G)), OR(NOT(G), NOT(F))
+- AND(f, g): AND(f, g), AND(g, f), OR(NOT(F), NOT(G)), OR(NOT(G), NOT(F)), $\neg$
 - OR(f, g): OR(f, g), OR(g, f), AND(NOT(F), NOT(G)), AND(NOT(G), NOT(F))
 - XOR(f, g): XOR(f, g), XOR(g, f), XOR(NOT(F), NOT(G)), XOR(NOT(G), NOT(F))
 - ITE(f, g, h): ITE(f, g, h), ITE(NOT(f), h, g), ITE(f, NOT(g), NOT(h)), ITE(NOT(f), NOT(h), NOT(g)).
