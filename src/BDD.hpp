@@ -459,7 +459,10 @@ public:
 
         binary_cache_options options{
                 binary_cache_option(computed_table_XOR, binary_cache_key(f, g), false),
-                binary_cache_option(computed_table_XOR, binary_cache_key(g, f), false)
+                binary_cache_option(computed_table_XOR, binary_cache_key(g, f), false),
+                // functional equivalence
+                binary_cache_option(computed_table_XOR, binary_cache_key(NOT(g), NOT(f)), false),
+                binary_cache_option(computed_table_XOR, binary_cache_key(NOT(f), NOT(g)), false)
         };
 
         return cached_computation(
@@ -477,7 +480,10 @@ public:
 
         binary_cache_options options{
                 binary_cache_option(computed_table_AND, binary_cache_key(f, g), false),
-                binary_cache_option(computed_table_AND, binary_cache_key(g, f), false)
+                binary_cache_option(computed_table_AND, binary_cache_key(g, f), false),
+                // De Morgan's
+                binary_cache_option(computed_table_OR, binary_cache_key(NOT(f), NOT(g)), true),
+                binary_cache_option(computed_table_OR, binary_cache_key(NOT(g), NOT(f)), true)
         };
 
         return cached_computation(
@@ -495,7 +501,10 @@ public:
 
         binary_cache_options options{
                 binary_cache_option(computed_table_OR, binary_cache_key(f, g), false),
-                binary_cache_option(computed_table_OR, binary_cache_key(g, f), false)
+                binary_cache_option(computed_table_OR, binary_cache_key(g, f), false),
+                // De Morgan's
+                binary_cache_option(computed_table_AND, binary_cache_key(NOT(f), NOT(g)), true),
+                binary_cache_option(computed_table_AND, binary_cache_key(NOT(g), NOT(f)), true)
         };
 
         return cached_computation(
@@ -513,7 +522,10 @@ public:
 
         ternary_cache_options options{
                 ternary_cache_option(computed_table_ITE, ternary_cache_key(f, g, h), false),
-                ternary_cache_option(computed_table_ITE, ternary_cache_key(NOT(f), h, g), false)
+                ternary_cache_option(computed_table_ITE, ternary_cache_key(NOT(f), h, g), false),
+                // functional equivalence
+                ternary_cache_option(computed_table_ITE, ternary_cache_key(f, NOT(g), NOT(h)), true),
+                ternary_cache_option(computed_table_ITE, ternary_cache_key(NOT(f), NOT(h), NOT(g)), true),
         };
 
         return cached_computation(
